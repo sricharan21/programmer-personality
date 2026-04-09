@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Programmer Personality Type</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c26; --border: #2a2a3a;
+      --text: #e8e8f0; --muted: #7878a0; --accent: #7c6aff; --accent2: #ff6a9b;
+      --green: #4ade80; --yellow: #fbbf24; --blue: #60a5fa;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem 5rem; }
+    header { text-align: center; margin-bottom: 2.5rem; max-width: 560px; }
+    .logo { font-size: 2.8rem; margin-bottom: 0.5rem; }
+    header h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2; }
+    header p { color: var(--muted); margin-top: 0.5rem; font-size: 0.95rem; line-height: 1.5; }
+    .quiz-wrap { width: 100%; max-width: 600px; }
+    .progress-bar-wrap { background: var(--surface2); border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width 0.4s ease; }
+    .q-counter { font-size: 0.8rem; color: var(--muted); text-align: right; margin-bottom: 0.5rem; }
+    .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 1.25rem; }
+    .question-text { font-size: 1.15rem; font-weight: 600; line-height: 1.5; margin-bottom: 1.5rem; color: var(--text); }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1.1rem; cursor: pointer; font-size: 0.95rem; color: var(--text); text-align: left; transition: border-color 0.15s, background 0.15s, transform 0.1s; line-height: 1.4; }
+    .option:hover { border-color: var(--accent); background: #1e1b30; }
+    .option:active { transform: scale(0.99); }
+    .option.selected { border-color: var(--accent); background: #1e1b30; color: #c4baff; }
+    .next-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; border: none; border-radius: 10px; padding: 0.85rem; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.1s; display: none; }
+    .next-btn:hover { opacity: 0.88; }
+    .next-btn:active { transform: scale(0.98); }
+    #result { width: 100%; max-width: 600px; display: none; }
+    .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; text-align: center; margin-bottom: 1.25rem; }
+    .result-emoji { font-size: 4rem; margin-bottom: 0.75rem; }
+    .result-type { font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.4rem; }
+    .result-tagline { font-size: 1rem; color: var(--muted); font-style: italic; margin-bottom: 1.5rem; }
+    .traits { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 1.5rem; }
+    .trait { background: var(--surface2); border: 1px solid var(--border); border-radius: 99px; padding: 5px 14px; font-size: 0.82rem; color: var(--muted); }
+    .result-desc { font-size: 0.95rem; color: var(--muted); line-height: 1.7; text-align: left; border-top: 1px solid var(--border); padding-top: 1.25rem; }
+    .breakdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.25rem; }
+    .breakdown-card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
+    .breakdown-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .breakdown-label { font-size: 0.82rem; color: var(--muted); width: 130px; flex-shrink: 0; }
+    .breakdown-track { flex: 1; background: var(--surface2); border-radius: 99px; height: 6px; overflow: hidden; }
+    .breakdown-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+    .breakdown-val { font-size: 0.82rem; color: var(--muted); width: 30px; text-align: right; }
+    .action-btns { display: flex; gap: 10px; margin-bottom: 1rem; }
+    .share-btn { flex: 1; background: var(--surface2); border: 1px dashed var(--border); border-radius: 10px; color: var(--muted); font-size: 0.9rem; padding: 0.75rem; cursor: pointer; transition: background 0.2s, color 0.2s; }
+    .share-btn:hover { background: var(--surface); color: var(--text); }
+    .retry-btn { flex: 1; background: transparent; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-size: 0.9rem; padding: 0.75rem; cursor: pointer; transition: background 0.2s, color 0.2s; }
+    .retry-btn:hover { background: var(--surface); color: var(--text); }
+    .footer-note { text-align: center; color: var(--muted); font-size: 0.78rem; margin-top: 2rem; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.3s ease forwards; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🧠</div>
+    <h1>Programmer Personality Type</h1>
+    <p>8 questions. Brutally accurate results. No fluff.</p>
+  </header>
+  <div class="quiz-wrap" id="quiz">
+    <div class="q-counter" id="q-counter">Question 1 of 8</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <div class="question-card fade-in" id="question-card">
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next →</button>
+  </div>
+  <div id="result"></div>
+  <div class="footer-note">No data collected. All logic runs in your browser.<br/>Share your type and tag a colleague who'll get the same one.</div>
+
+  <script>
+    const questions = [
+      { q: "You open a new project. First thing you do?", options: [
+        { text: "Set up the perfect folder structure, linter, formatter, CI/CD pipeline...", scores: { overengineer: 3, perfectionist: 1 } },
+        { text: "Google 'how to start a [language] project' and copy the first result", scores: { copypaste: 3, chaos: 1 } },
+        { text: "Open a blank file and just start typing", scores: { minimalist: 2, chaos: 2 } },
+        { text: "Read the docs first. All of them.", scores: { perfectionist: 3, architect: 1 } }
+      ]},
+      { q: "Tabs or spaces?", options: [
+        { text: "Spaces. Always spaces. This is not up for debate.", scores: { perfectionist: 2, darkmode: 1 } },
+        { text: "Tabs. Fight me.", scores: { chaos: 2, overengineer: 1 } },
+        { text: "Whatever the linter says. I have no feelings about this.", scores: { minimalist: 3, rubberduck: 1 } },
+        { text: "I have a 47-slide deck on why this question is more nuanced than people think.", scores: { overengineer: 3, architect: 2 } }
+      ]},
+      { q: "A bug hits production at 4:55pm on a Friday.", options: [
+        { text: "Rollback immediately. Deploy Monday. Go home.", scores: { paranoid: 3, minimalist: 1 } },
+        { text: "Fix it right now. I cannot leave knowing this exists.", scores: { perfectionist: 3, overengineer: 1 } },
+        { text: "It was working before my last deploy... close the laptop slowly.", scores: { chaos: 3, copypaste: 1 } },
+        { text: "Open an incident channel. Write a post-mortem before touching anything.", scores: { architect: 3, paranoid: 2 } }
+      ]},
+      { q: "How do you name your variables?", options: [
+        { text: "Descriptive, self-documenting names. Code is poetry.", scores: { perfectionist: 3, architect: 1 } },
+        { text: "x, y, temp, data, data2, finalData, finalDataActual", scores: { chaos: 3, copypaste: 1 } },
+        { text: "Single letters when it's obvious from context. Stop being verbose.", scores: { minimalist: 3, darkmode: 1 } },
+        { text: "I name them, then rename them 4 times before committing", scores: { perfectionist: 2, overengineer: 2 } }
+      ]},
+      { q: "What does your git commit history look like?", options: [
+        { text: "feat: add user auth with JWT, bcrypt, rate limiting, refresh tokens...", scores: { overengineer: 3, perfectionist: 1 } },
+        { text: "fix, wip, wip2, final, FINAL, ok this time for real", scores: { chaos: 3, copypaste: 1 } },
+        { text: "One commit. 'initial commit'. Everything is in main.", scores: { minimalist: 2, chaos: 2 } },
+        { text: "Conventional commits, semantic versioning, signed tags. Obviously.", scores: { perfectionist: 3, architect: 2 } }
+      ]},
+      { q: "You're stuck on a problem for 2 hours. You...", options: [
+        { text: "Explain it out loud to nobody. Solve it mid-sentence. Feel stupid.", scores: { rubberduck: 3, minimalist: 1 } },
+        { text: "Stack Overflow + copy the top answer + pray", scores: { copypaste: 3, chaos: 1 } },
+        { text: "Rewrite the entire module from scratch to 'understand it better'", scores: { overengineer: 2, tenx: 2 } },
+        { text: "Step away. Make tea. Come back. It was a missing semicolon.", scores: { minimalist: 2, rubberduck: 2 } }
+      ]},
+      { q: "What's your relationship with documentation?", options: [
+        { text: "I write docs before I write code. Yes, I'm serious.", scores: { perfectionist: 3, architect: 2 } },
+        { text: "Good code documents itself. (It does not.)", scores: { minimalist: 2, chaos: 2 } },
+        { text: "I'll write it later. (I will not.)", scores: { chaos: 2, tenx: 2 } },
+        { text: "I have a 200-page wiki for a project used by 3 people including myself.", scores: { overengineer: 3, paranoid: 1 } }
+      ]},
+      { q: "A new JavaScript framework dropped yesterday. You...", options: [
+        { text: "Already have a side project in it. Considering rewriting prod.", scores: { tenx: 3, stackchaser: 3 } },
+        { text: "Interesting. Will evaluate in 2 years when it's stable.", scores: { architect: 3, paranoid: 2 } },
+        { text: "Sigh. Add it to the list of things I'll never learn.", scores: { meeting: 3, copypaste: 1 } },
+        { text: "I'm still learning the last one. Please stop.", scores: { rubberduck: 2, paranoid: 2 } }
+      ]}
+    ];
+
+    const personalities = {
+      overengineer: { emoji: '🏗️', type: 'The Overengineer', tagline: '"Why use 1 tool when 7 will do"', traits: ['Microservices for todo apps', 'Docker everything', 'Kubernetes at home', '47 npm packages'], desc: "You don't solve problems, you architect solutions. Your side projects have better infrastructure than most startups. You've introduced Kubernetes to an app with 12 users. You have opinions about database sharding that nobody asked for. Deep down you know the simple solution would have worked — you just couldn't live with it." },
+      copypaste: { emoji: '📋', type: 'The Copy-Paste Ninja', tagline: '"Why write when Stack Overflow exists"', traits: ['Stack Overflow hero', 'Ctrl+C Ctrl+V master', 'Tab hoarder', '47 open browser tabs'], desc: "You are standing on the shoulders of giants — giants who posted on Stack Overflow in 2012 and haven't been heard from since. You don't always understand the code you ship, but it works and that's between you and God. You've copy-pasted bugs from one project into three others. You call this 'code reuse'." },
+      perfectionist: { emoji: '🎯', type: 'The Perfectionist', tagline: '"It\'s not done until it\'s perfect. It\'s never done."', traits: ['PR with 200 comments', 'Linter purist', 'Refactor before shipping', 'Zero warnings ever'], desc: "You've rewritten the same function 8 times in one sitting. You cannot merge a PR with a lint warning. You've blocked a release because a variable name wasn't descriptive enough. Your code is beautiful. Your delivery dates are a myth. Somewhere there's a perfect version of your project that will never ship because it could always be slightly better." },
+      chaos: { emoji: '🌪️', type: 'The Chaos Agent', tagline: '"It works on my machine"', traits: ['Commits directly to main', 'No .gitignore', 'Ship and pray', '4am pushes'], desc: "Your local environment is a crime scene that somehow produces working software. You've pushed API keys to GitHub at least once. Your commit messages are a cry for help. You deploy on Fridays at 5pm and feel nothing. Your colleagues fear you. Your code ships. You are a force of nature that no linter can contain." },
+      minimalist: { emoji: '⚡', type: 'The Minimalist', tagline: '"Deleted more code than they wrote. Proud of it."', traits: ['Fewer dependencies', 'Vim user', 'No frameworks needed', 'YAGNI believer'], desc: "Your PRs are mostly deletions. You've replaced a 200-line function with 8 lines and called it a good week. You resist every new dependency like it owes you money. You have opinions about bloat. Your node_modules is concerningly small. You sleep well at night because your codebase is clean, and cleanliness is next to godliness." },
+      architect: { emoji: '🗿', type: 'The Silent Architect', tagline: '"Has opinions. Shares none of them. Until the rewrite."', traits: ['Reads RFCs for fun', 'Has a plan', 'Waits, then acts', 'Speaks once, correctly'], desc: "You said nothing during the entire planning meeting. Then, when everyone agreed on an approach, you quietly said 'that won't scale' and were correct. You've been designing the perfect system in your head for 3 years. One day you will build it. It will be flawless. Nobody will know you wrote it — that's how you like it." },
+      rubberduck: { emoji: '🦆', type: 'The Rubber Duck', tagline: '"Explains the problem, solves it mid-sentence"', traits: ['Thinks out loud', 'Great debugger', 'Talks to plants', 'Solves own problems'], desc: "You have interrupted yourself 3 times while explaining a bug to a colleague to say 'wait, I think I know what it is.' You keep a rubber duck on your desk unironically. You've solved production issues while writing Slack messages about them. Your superpower is articulation — the moment you describe a problem precisely, you already know the answer." },
+      darkmode: { emoji: '🌑', type: 'The Dark Mode Cultist', tagline: '"Has never seen a light theme. Never will."', traits: ['f.lux at 1800K', 'Terminal everything', 'Hates bright UIs', 'Night owl always'], desc: "You changed VS Code to dark mode before you wrote your first line of code. You've sent unsolicited feedback to apps that don't have a dark mode. Light theme is a human rights violation and you will die on this hill. The sun is your natural enemy." },
+      paranoid: { emoji: '😰', type: 'The Paranoid Deployer', tagline: '"Every deploy is a prayer."', traits: ['Reads every diff twice', 'Staging always', 'Rollback plans ready', 'No Friday deploys. Ever.'], desc: "You have never deployed on a Friday. You have a pre-deploy checklist with 23 items. You've rolled back a perfectly working deployment because 'something felt off'. You monitor logs for 45 minutes after every release. Your staging environment is more stable than most people's production. Sleep is difficult the night before a big release." },
+      tenx: { emoji: '🚀', type: 'The 10x Mythologist', tagline: '"Rewrites everything, finishes nothing"', traits: ['Rewrites > fixes', 'Big ideas daily', 'Moves fast breaks things', 'Always greenfield'], desc: "You've started 4 rewrites of the same project. Each one was going to fix everything. You have a graveyard of revolutionary side projects at 60% completion. Legacy code is a personal insult. You've introduced technical debt that will outlive you. Somewhere in your repos is the skeleton of something that could have been great." },
+      meeting: { emoji: '📅', type: 'The Meeting Survivor', tagline: '"Writes code between meetings. Mostly in meetings."', traits: ['Calendar fully booked', 'Codes on mute', 'Sync after sync', 'Async dreams'], desc: "Your calendar is a game of Tetris and coding is what falls through the cracks. You've fixed bugs on mute during an all-hands. You know the hold music for every recurring meeting. You dream of a world with no standups. You have 6 standups today." },
+      stackchaser: { emoji: '🏄', type: 'The Stack Chaser', tagline: '"Learned 4 frameworks this month. Ships nothing."', traits: ['Always learning', 'Framework collector', 'Tutorial finisher', 'Side project hoarder'], desc: "You've completed the official tutorial for 11 frameworks this year. Your GitHub is full of 'learning-X' repos with 1 commit. You know the pros and cons of every state management library but haven't shipped a feature in months. One day you will have learned enough. That day has not come." }
+    };
+
+    let current = 0, scores = {}, answers = [];
+    Object.keys(personalities).forEach(k => scores[k] = 0);
+
+    function renderQuestion() {
+      const q = questions[current];
+      document.getElementById('q-counter').textContent = `Question ${current + 1} of ${questions.length}`;
+      document.getElementById('progress-bar').style.width = `${(current / questions.length) * 100}%`;
+      document.getElementById('question-text').textContent = q.q;
+      const optionsEl = document.getElementById('options');
+      optionsEl.innerHTML = '';
+      const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+      shuffled.forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = opt.text;
+        btn.onclick = () => selectOption(btn, opt);
+        optionsEl.appendChild(btn);
+      });
+      document.getElementById('next-btn').style.display = 'none';
+      document.getElementById('question-card').classList.remove('fade-in');
+      void document.getElementById('question-card').offsetWidth;
+      document.getElementById('question-card').classList.add('fade-in');
+    }
+
+    function selectOption(btn, opt) {
+      if (answers[current]) {
+        const prev = answers[current];
+        Object.entries(prev.scores).forEach(([k, v]) => scores[k] -= v);
+      }
+      document.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      answers[current] = opt;
+      Object.entries(opt.scores).forEach(([k, v]) => scores[k] += v);
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.style.display = 'block';
+      nextBtn.textContent = current < questions.length - 1 ? 'Next →' : 'Show my type →';
+    }
+
+    function nextQuestion() {
+      if (!answers[current]) return;
+      if (current < questions.length - 1) { current++; renderQuestion(); }
+      else showResult();
+    }
+
+    function showResult() {
+      document.getElementById('quiz').style.display = 'none';
+      const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+      const topKey = sorted[0][0];
+      const p = personalities[topKey];
+      const maxScore = sorted[0][1] || 1;
+      const top5 = sorted.slice(0, 5);
+      const barColors = ['#7c6aff', '#ff6a9b', '#60a5fa', '#4ade80', '#fbbf24'];
+      const breakdownRows = top5.map(([key, val], i) => {
+        const pct = Math.round((val / maxScore) * 100);
+        return `<div class="breakdown-row"><div class="breakdown-label">${personalities[key].type.replace('The ', '')}</div><div class="breakdown-track"><div class="breakdown-fill" style="width:0%; background:${barColors[i]}" data-pct="${pct}"></div></div><div class="breakdown-val">${pct}%</div></div>`;
+      }).join('');
+      const traitPills = p.traits.map(t => `<span class="trait">${t}</span>`).join('');
+      document.getElementById('result').innerHTML = `
+        <div class="result-card fade-in">
+          <div class="result-emoji">${p.emoji}</div>
+          <div class="result-type">${p.type}</div>
+          <div class="result-tagline">${p.tagline}</div>
+          <div class="traits">${traitPills}</div>
+          <div class="result-desc">${p.desc}</div>
+        </div>
+        <div class="breakdown-card fade-in">
+          <h3>Your personality breakdown</h3>
+          ${breakdownRows}
+        </div>
+        <div class="action-btns">
+          <button class="share-btn" onclick="copyResult('${topKey}')">📋 Copy to share</button>
+          <button class="retry-btn" onclick="restart()">↩ Retake quiz</button>
+        </div>`;
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        document.querySelectorAll('.breakdown-fill').forEach(el => { el.style.width = el.dataset.pct + '%'; });
+      }, 200);
+    }
+
+    function copyResult(key) {
+      const p = personalities[key];
+      const btn = document.querySelector('.share-btn');
+      const text = `I took the Programmer Personality quiz and I'm:\n\n${p.emoji} ${p.type}\n${p.tagline}\n\nTraits: ${p.traits.join(', ')}\n\nFind out yours 👇\nhttps://sricharan21.github.io/programmer-personality/`;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => btn.textContent = '📋 Copy to share', 2500);
+      });
+    }
+
+    function restart() {
+      current = 0; answers = [];
+      Object.keys(scores).forEach(k => scores[k] = 0);
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('quiz').style.display = 'block';
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>
